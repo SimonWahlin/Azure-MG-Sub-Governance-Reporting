@@ -1,5 +1,3 @@
-# LOG:
-# Current position: Line 534
 <#
 .SYNOPSIS
     This script creates the following files to help better understand and audit your governance setup
@@ -262,7 +260,7 @@ Param
     [string]$ProductVersion = "v6_major_20211018_1",
     [string]$GithubRepository = "aka.ms/AzGovViz",
     [string]$ManagementGroupId,
-    [switch]$AzureDWikiAsCodeevOps, #Use this parameter only when running AzGovViz in a Azure DevOps Pipeline!
+    [switch]$AzureDevOpsWikiAsCode, #Use this parameter only when running AzGovViz in a Azure DevOps Pipeline!
     [switch]$DebugAzAPICall,
     [switch]$NoCsvExport,
     [string]$CsvDelimiter = ";",
@@ -775,18 +773,11 @@ if ($CsvDelimiter -eq ",") {
     $CsvDelimiterOpposite = ";"
 }
 #endregion delimiter
-function Add-IndexNumberToArray (
-    [Parameter(Mandatory = $True)]
-    [array]$array
-) {
-    for ($i = 0; $i -lt ($array | Measure-Object).count; $i++) {
-        Add-Member -InputObject $array[$i] -Name "#" -Value ($i + 1) -MemberType NoteProperty
-    }
-    $array
-}
 
-#JWTDetails https://www.powershellgallery.com/packages/JWTDetails/1.0.2
+#region Function
+
 #region jwtdetails
+#JWTDetails https://www.powershellgallery.com/packages/JWTDetails/1.0.2
 function getJWTDetails {
     [cmdletbinding()]
     param(
@@ -841,7 +832,6 @@ function getJWTDetails {
 $funcGetJWTDetails = $function:getJWTDetails.ToString()
 #endregion jwtdetails
 
-#Bearer Token
 #region createbearertoken
 function createBearerToken {
     param(
@@ -902,26 +892,27 @@ function createBearerToken {
     Write-Output $newBearerAccessTokenRequest.AccessToken
 }
 $funcCreateBearerToken = $function:createBearerToken.ToString()
-$htBearerAccessToken = @{}
+$htBearerAccessToken = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
 #endregion createbearertoken
 
 #region namingValidation
 #ToDo: Test if using string.Contains works here
 function namingValidation($toCheck) {
+    # $checks = @(':', '/', '\', '<', '>', '|', '"', '*', '?')
+    # $Pattern = '[{0}]' -f [regex]::escape(-join $checks)
+    # $Array = [regex]::Matches($toCheck,$Pattern).Value
+
     $checks = @(':', '/', '\', '<', '>', '|', '"')
     $array = @()
     foreach ($check in $checks) {
         if ($toCheck -like "*$($check)*") {
-            #Write-Host "$toCheck -> '$check'"
             $array += $check
         }
     }
     if ($toCheck -match "\*") {
-        #Write-Host "$toCheck -> '*'"
         $array += '*'
     }
     if ($toCheck -match "\?") {
-        #Write-Host "$toCheck -> '?'"
         $array += '?'
     }
     return $array
@@ -1659,6 +1650,18 @@ function AzAPICallDiag {
 }
 $funcAzAPICallDiag = $function:AzAPICallDiag.ToString()
 #endregion azapicalldiag
+
+#region AddIndexNumberToArray
+function AddIndexNumberToArray (
+    [Parameter(Mandatory = $True)]
+    [array]$array
+) {
+    for ($i = 0; $i -lt ($array | Measure-Object).count; $i++) {
+        Add-Member -InputObject $array[$i] -Name "#" -Value ($i + 1) -MemberType NoteProperty
+    }
+    $array
+}
+#endregion AddIndexNumberToArray
 
 #region getRoleAssignments
 function GetRoleAssignments {
