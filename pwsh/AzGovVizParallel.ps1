@@ -259,7 +259,7 @@
 Param
 (
     [string]$Product = "AzGovViz",
-    [string]$ProductVersion = "v6_major_20211018_1",
+    [string]$ProductVersion = "v6_major_20211021_1",
     [string]$GithubRepository = "aka.ms/AzGovViz",
     [string]$ManagementGroupId,
     [switch]$AzureDevOpsWikiAsCode, #Use this parameter only when running AzGovViz in a Azure DevOps Pipeline!
@@ -1263,7 +1263,8 @@ function AzAPICall {
                     ($getDiagnosticSettingsMg -and $catchResult.error.code -eq "InvalidResourceType") -or
                     ($catchResult.error.code -eq "InsufficientPermissions") -or
                     $catchResult.error.code -eq "ClientCertificateValidationFailure" -or
-                    ($validateAccess -and $catchResult.error.code -eq "Authorization_RequestDenied")
+                    ($validateAccess -and $catchResult.error.code -eq "Authorization_RequestDenied") -or
+                    $catchResult.error.code -eq "GatewayAuthenticationFailed"
                 ) {
                     if (($getPolicyCompliance -and $catchResult.error.code -like "*ResponseTooLarge*") -or ($getPolicyCompliance -and -not $catchResult.error.code)) {
                         if ($getPolicyCompliance -and $catchResult.error.code -like "*ResponseTooLarge*") {
@@ -1469,7 +1470,7 @@ function AzAPICall {
                         return "InvalidResourceType"
                     }
 
-                    if ($catchResult.error.code -eq "InsufficientPermissions" -or $catchResult.error.code -eq "ClientCertificateValidationFailure") {
+                    if ($catchResult.error.code -eq "InsufficientPermissions" -or $catchResult.error.code -eq "ClientCertificateValidationFailure" -or $catchResult.error.code -eq "GatewayAuthenticationFailed") {
                         $maxTries = 5
                         $sleepSec = @(1, 3, 5, 7, 10, 12, 20, 30)[$tryCounter]
                         if ($tryCounter -gt $maxTries) {
@@ -21351,7 +21352,7 @@ if ($htParameters.HierarchyMapOnly -eq $false) {
     $builtinPolicyDefinitions = $requestPolicyDefinitionAPI.where( { $_.properties.policyType -eq "BuiltIn" } )
     Write-Host " $($builtinPolicyDefinitions.Count) BuiltIn PolicyDefinitions API filtered by BuiltIn"
     $builtInPolicyDefinitionsCount = $builtinPolicyDefinitions.Count
-    Write-Host " var builtInPolicyDefinitionsCount = $($builtInPolicyDefinitionsCount)"
+
     foreach ($builtinPolicyDefinition in $builtinPolicyDefinitions) {
         ($htCacheDefinitionsPolicy).(($builtinPolicyDefinition.Id).ToLower()) = @{}
         ($htCacheDefinitionsPolicy).(($builtinPolicyDefinition.Id).ToLower()).Id = ($builtinPolicyDefinition.Id).ToLower()
