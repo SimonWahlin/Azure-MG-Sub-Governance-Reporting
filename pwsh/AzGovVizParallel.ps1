@@ -1,5 +1,6 @@
 # $threadSafeDictionary = [System.Collections.Concurrent.ConcurrentDictionary[string,object]]::new()
 # https://docs.microsoft.com/en-us/dotnet/standard/collections/thread-safe/?redirectedfrom=MSDN
+# if('Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider' -as [type]) {'type is loaded'}else{Load-Type}
 <#
 .SYNOPSIS
     This script creates the following files to help better understand and audit your governance setup
@@ -332,7 +333,7 @@ Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings "true"
 
 #region file
 #filedir
-function Test-OutputPath {
+function Resolve-OutputPath {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
@@ -356,7 +357,7 @@ function Test-OutputPath {
 
     Write-Output $outputPath
 }
-$outputPath = Test-OutputPath -outputPath $outputPath
+$outputPath = Resolve-OutputPath -outputPath $outputPath
 $DirectorySeparatorChar = [IO.Path]::DirectorySeparatorChar
 
 #fileTimestamp
@@ -422,122 +423,141 @@ if ($LargeTenant -eq $true) {
     $RBACAtScopeOnly = $true
 }
 
-$htParameters = @{}
-$htParameters.ProductVersion = $ProductVersion
-$htParameters.AzCloudEnv = $checkContext.Environment.Name
-$htParameters.GithubRepository = $GithubRepository
+$htParameters = @{
+    ProductVersion                               = $ProductVersion
+    AzCloudEnv                                   = $checkContext.Environment.Name
+    GithubRepository                             = $GithubRepository
+    AzureDevOpsWikiAsCode                        = [bool]$AzureDevOpsWikiAsCode
+    DebugAzAPICall                               = [bool]$DebugAzAPICall
+    DoNotShowRoleAssignmentsUserData             = [bool]$DoNotShowRoleAssignmentsUserData
+    HierarchyMapOnly                             = [bool]$HierarchyMapOnly
+    NoASCSecureScore                             = [bool]$NoASCSecureScore
+    PolicyAtScopeOnly                            = [bool]$PolicyAtScopeOnly
+    RBACAtScopeOnly                              = [bool]$RBACAtScopeOnly
+    NoResourceProvidersDetailed                  = [bool]$NoResourceProvidersDetailed
+    NoPolicyComplianceStates                     = [bool]$NoPolicyComplianceStates
+    NoAzureConsumption                           = [bool]$NoAzureConsumption
+    DoNotIncludeResourceGroupsOnPolicy           = [bool]$DoNotIncludeResourceGroupsOnPolicy
+    DoNotIncludeResourceGroupsAndResourcesOnRBAC = [bool]$DoNotIncludeResourceGroupsAndResourcesOnRBAC
+    LargeTenant                                  = [bool]$LargeTenant
+    NoJsonExport                                 = [bool]$NoJsonExport
+    NoResources                                  = [bool]$NoResources
+}
+# $htParameters.ProductVersion = $ProductVersion
+# $htParameters.AzCloudEnv = $checkContext.Environment.Name
+# $htParameters.GithubRepository = $GithubRepository
 
 if ($AzureDevOpsWikiAsCode) {
     # Trying to use ErrorAction to control the way we break instead of WikiAsCode variable
     $ErrorActionPreference = 'Continue'
-    $htParameters.AzureDevOpsWikiAsCode = $true
+    # $htParameters.AzureDevOpsWikiAsCode = $true
 }
 else {
     $ErrorActionPreference = 'Stop'
-    $htParameters.AzureDevOpsWikiAsCode = $false
+    # $htParameters.AzureDevOpsWikiAsCode = $false
 }
 
 if ($DebugAzAPICall) {
     $DebugPreference = 'Continue'
-    $htParameters.DebugAzAPICall = $true
+    # $htParameters.DebugAzAPICall = $true
     write-host "AzAPICall debug enabled" -ForegroundColor Cyan
 }
 else {
     $DebugPreference = 'SilentlyContinue'
-    $htParameters.DebugAzAPICall = $false
+    # $htParameters.DebugAzAPICall = $false
     write-host "AzAPICall debug disabled" -ForegroundColor Cyan
 }
 
-if ($DoNotShowRoleAssignmentsUserData) {
-    $htParameters.DoNotShowRoleAssignmentsUserData = $true
-}
-else {
-    $htParameters.DoNotShowRoleAssignmentsUserData = $false
-}
+# if ($DoNotShowRoleAssignmentsUserData) {
+#     $htParameters.DoNotShowRoleAssignmentsUserData = $true
+# }
+# else {
+#     $htParameters.DoNotShowRoleAssignmentsUserData = $false
+# }
 
-if ($HierarchyMapOnly) {
-    $htParameters.HierarchyMapOnly = $true
-}
-else {
-    $htParameters.HierarchyMapOnly = $false
-}
+# if ($HierarchyMapOnly) {
+#     $htParameters.HierarchyMapOnly = $true
+# }
+# else {
+#     $htParameters.HierarchyMapOnly = $false
+# }
 
-if ($NoASCSecureScore) {
-    $htParameters.NoASCSecureScore = $true
-}
-else {
-    $htParameters.NoASCSecureScore = $false
-}
+# if ($NoASCSecureScore) {
+#     $htParameters.NoASCSecureScore = $true
+# }
+# else {
+#     $htParameters.NoASCSecureScore = $false
+# }
 
-if ($PolicyAtScopeOnly) {
-    $htParameters.PolicyAtScopeOnly = $true
-}
-else {
-    $htParameters.PolicyAtScopeOnly = $false
-}
+# if ($PolicyAtScopeOnly) {
+#     $htParameters.PolicyAtScopeOnly = $true
+# }
+# else {
+#     $htParameters.PolicyAtScopeOnly = $false
+# }
 
-if ($RBACAtScopeOnly) {
-    $htParameters.RBACAtScopeOnly = $true
-}
-else {
-    $htParameters.RBACAtScopeOnly = $false
-}
+# if ($RBACAtScopeOnly) {
+#     $htParameters.RBACAtScopeOnly = $true
+# }
+# else {
+#     $htParameters.RBACAtScopeOnly = $false
+# }
 
-if ($NoResourceProvidersDetailed) {
-    $htParameters.NoResourceProvidersDetailed = $true
-}
-else {
-    $htParameters.NoResourceProvidersDetailed = $false
-}
+# if ($NoResourceProvidersDetailed) {
+#     $htParameters.NoResourceProvidersDetailed = $true
+# }
+# else {
+#     $htParameters.NoResourceProvidersDetailed = $false
+# }
 
-if ($NoPolicyComplianceStates) {
-    $htParameters.NoPolicyComplianceStates = $true
-}
-else {
-    $htParameters.NoPolicyComplianceStates = $false
-}
+# if ($NoPolicyComplianceStates) {
+#     $htParameters.NoPolicyComplianceStates = $true
+# }
+# else {
+#     $htParameters.NoPolicyComplianceStates = $false
+# }
 
-if ($NoAzureConsumption) {
-    $htParameters.NoAzureConsumption = $true
-}
-else {
-    $htParameters.NoAzureConsumption = $false
-}
+# if ($NoAzureConsumption) {
+#     $htParameters.NoAzureConsumption = $true
+# }
+# else {
+#     $htParameters.NoAzureConsumption = $false
+# }
 
-if ($DoNotIncludeResourceGroupsOnPolicy) {
-    $htParameters.DoNotIncludeResourceGroupsOnPolicy = $true
-}
-else {
-    $htParameters.DoNotIncludeResourceGroupsOnPolicy = $false
-}
+# if ($DoNotIncludeResourceGroupsOnPolicy) {
+#     $htParameters.DoNotIncludeResourceGroupsOnPolicy = $true
+# }
+# else {
+#     $htParameters.DoNotIncludeResourceGroupsOnPolicy = $false
+# }
 
-if ($DoNotIncludeResourceGroupsAndResourcesOnRBAC) {
-    $htParameters.DoNotIncludeResourceGroupsAndResourcesOnRBAC = $true
-}
-else {
-    $htParameters.DoNotIncludeResourceGroupsAndResourcesOnRBAC = $false
-}
+# if ($DoNotIncludeResourceGroupsAndResourcesOnRBAC) {
+#     $htParameters.DoNotIncludeResourceGroupsAndResourcesOnRBAC = $true
+# }
+# else {
+#     $htParameters.DoNotIncludeResourceGroupsAndResourcesOnRBAC = $false
+# }
 
-if ($LargeTenant) {
-    $htParameters.LargeTenant = $true
-}
-else {
-    $htParameters.LargeTenant = $false
-}
+# if ($LargeTenant) {
+#     $htParameters.LargeTenant = $true
+# }
+# else {
+#     $htParameters.LargeTenant = $false
+# }
 
-if (-not $NoJsonExport) {
-    $htParameters.NoJsonExport = $false
-}
-else {
-    $htParameters.NoJsonExport = $true
-}
+# if (-not $NoJsonExport) {
+#     $htParameters.NoJsonExport = $false
+# }
+# else {
+#     $htParameters.NoJsonExport = $true
+# }
 
-if (-not $NoResources) {
-    $htParameters.NoResources = $false
-}
-else {
-    $htParameters.NoResources = $true
-}
+# if (-not $NoResources) {
+#     $htParameters.NoResources = $false
+# }
+# else {
+#     $htParameters.NoResources = $true
+# }
 #endregion htParameters
 
 #region PowerShellEditionAnVersionCheck
@@ -550,6 +570,19 @@ function Assert-PSVersion {
     )
 
     Write-Host "Checking powershell edition and version"
+    # $Req = [version]$requiredPSVersion
+    # if($PSVersionTable.PSVersion -ge $Req) {
+    #     Write-Host "'$($PSVersionTable.PSVersion)' fulfills requirement of version '$Req'"
+    #     return $true
+    # }
+    # else {
+    #     Write-Host "'$($PSVersionTable.PSVersion)' does not fulfill requirement of version '$Req'"
+    #     Write-Host " This AzGovViz version only supports Powershell 'Core' version '$($requiredPSVersion)' or higher"
+    #     Write-Host " Get Powershell: https://github.com/PowerShell/PowerShell#get-powershell"
+    #     Write-Host " Installing PowerShell on Windows: https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows"
+    #     Write-Host " Installing PowerShell on Linux: https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux"
+    #     return $false
+    # }
     $splitRequiredPSVersion = $requiredPSVersion.split('.')
     $splitRequiredPSVersionMajor = $splitRequiredPSVersion[0]
     $splitRequiredPSVersionMinor = $splitRequiredPSVersion[1]
@@ -651,13 +684,14 @@ function Assert-Context {
         [AllowNull()]
         [Microsoft.Azure.Commands.Profile.Models.Core.PSAzureContext]
         $Context,
-        $TargetSubscriptionId = 'undefined'
+        $TargetSubscriptionId = 'undefined',
+        [bool]$AzureDevOpsWikiAsCode = $false
     )
 
     Write-Host "Checking Az Context"
     if (-not $checkContext) {
         Write-Host " Context test failed: No context found. Please connect to Azure (run: Connect-AzAccount) and re-run AzGovViz" -ForegroundColor Red
-        if ($htParameters.AzureDevOpsWikiAsCode -eq $true) {
+        if ($AzureDevOpsWikiAsCode -eq $true) {
             Write-Error "Error"
         }
         else {
@@ -677,7 +711,7 @@ function Assert-Context {
                     $null = Set-AzContext -SubscriptionId $TargetSubscriptionId -ErrorAction Stop
                 }
                 catch {
-                    if ($htParameters.AzureDevOpsWikiAsCode -eq $true) {
+                    if ($AzureDevOpsWikiAsCode -eq $true) {
                         Write-Error "Error"
                     }
                     else {
@@ -697,7 +731,7 @@ function Assert-Context {
             $Context
             Write-Host " Context test failed: Context is not set to any Subscription. Set your context to a subscription by running: Set-AzContext -subscription <subscriptionId> (run Get-AzSubscription to get the list of available Subscriptions). When done re-run AzGovViz" -ForegroundColor Red
 
-            if ($htParameters.AzureDevOpsWikiAsCode -eq $true) {
+            if ($AzureDevOpsWikiAsCode -eq $true) {
                 Write-host " If this error occurs you may want to leverage parameter 'SubscriptionId4AzContext' (AzGovVizParallel.ps1 -SubscriptionId4AzContext '<SubscriptionId>')"
                 Write-Error "Error"
             }
@@ -713,7 +747,7 @@ function Assert-Context {
     }
 }
 
-Assert-Context -Context $checkContext -TargetSubscription $SubscriptionId4AzContext
+Assert-Context -Context $checkContext -TargetSubscription $SubscriptionId4AzContext -AzureDevOpsWikiAsCode $htParameters.AzureDevOpsWikiAsCode
 #endregion checkAzContext
 
 #region environmentcheck
@@ -918,8 +952,8 @@ $funcNamingValidation = $function:namingValidation.ToString()
 #endregion namingValidation
 
 #region resolveObjectIds
-function ResolveObjectIds($objectIds) {
-
+function ResolveObjectIds($objectIds, [hashtable]$htPrincipals) {
+    # Hashtables are by default passed as reference
     $arrayObjectIdsToCheck = @()
     $arrayObjectIdsToCheck = foreach ($objectToCheckIfAlreadyResolved in $objectIds) {
         if (-not $htPrincipals.($objectToCheckIfAlreadyResolved)) {
