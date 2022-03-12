@@ -25,7 +25,8 @@ Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings 'true'
 #Region initAZAPICall
 Write-Host "Initialize 'AzAPICall'"
 Write-Host " Import PS module 'AzAPICall'"
-Import-Module .\pwsh\module\AzAPICall\AzAPICall.psd1 -Force -ErrorAction Stop
+# Import-Module .\pwsh\module\AzAPICall\AzAPICall.psd1 -Force -ErrorAction Stop
+Import-Module '.\pwsh\bin\AzAPICall' -Force -ErrorAction Stop
 Write-Host "  Import PS module 'AzAPICall' succeeded" -ForegroundColor Green
 $parameters4AzAPICallModule = @{
     DebugAzAPICall           = $DebugAzAPICall
@@ -80,7 +81,7 @@ Write-Host 'Processing example call: Microsoft Graph API: Get - Groups'
 $apiEndPoint = $Configuration['htAzureEnvironmentRelatedUrls'].MicrosoftGraph
 $apiEndPointVersion = '/v1.0'
 $api = '/groups'
-$optionalQueryParameters = '?$top=50&$filter=(mailEnabled eq false and securityEnabled eq true)&$select=id,createdDateTime,displayName,description&$orderby=displayName asc&$count=true'
+$optionalQueryParameters = '?$top=888&$filter=(mailEnabled eq false and securityEnabled eq true)&$select=id,createdDateTime,displayName,description&$orderby=displayName asc&$count=true'
 
 #$uri = 'https://graph.microsoft.com/v1.0/groups?$top=888&$filter=(mailEnabled eq false and securityEnabled eq true)&$select=id,createdDateTime,displayName,description&$orderby=displayName asc&$count=true'
 $uri = $apiEndPoint + $apiEndPointVersion + $api + $optionalQueryParameters
@@ -107,10 +108,10 @@ if (-not $NoPsParallelization) {
     $htAzureAdGroupDetails = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable))
     $arrayGroupMembers = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $startTime = get-date
-
     $aadgroups | ForEach-Object -Parallel {
         $Configuration = $using:Configuration
-        Import-Module .\pwsh\module\AzAPICall\AzAPICall.psd1 -Force -ErrorAction Stop
+        # Import-Module .\pwsh\module\AzAPICall\AzAPICall.psd1 -Force -ErrorAction Stop
+        Import-Module '.\pwsh\bin\AzAPICall' -Force -ErrorAction Stop
         #general hashTables and arrays
         # $checkContext = $using:checkContext
         # $Configuration['htAzureEnvironmentRelatedUrls'] = $using:htAzureEnvironmentRelatedUrls
@@ -141,8 +142,8 @@ if (-not $NoPsParallelization) {
         $azAPICallPayload = @{
             uri         = $uri
             method      = 'GET'
-            currentTask = " '$($htAzureEnvironmentRelatedTargetEndpoints.($apiEndPoint.split('/')[2])) API: Get - Group List Members (id: $($group.id))'"
-            AzApiCallConfiguration = $Configuration
+            currentTask = " '$($Configuration['htAzureEnvironmentRelatedTargetEndpoints'].($apiEndPoint.split('/')[2])) API: Get - Group List Members (id: $($group.id))'"
+            AzAPICallConfiguration = $Configuration
         }
         Write-Host $azAPICallPayload.currentTask
 
@@ -188,7 +189,7 @@ else {
             uri         = $uri
             method      = 'GET'
             currentTask = "'$($htAzureEnvironmentRelatedTargetEndpoints.($apiEndPoint.split('/')[2])) API: Get - Group List Members (id: $($group.id))'"
-            AzApiCallConfiguration = $Configuration
+            AzAPICallConfiguration = $Configuration
         }
         Write-Host $azAPICallPayload.currentTask
 
@@ -257,7 +258,8 @@ if (-not $NoPsParallelization) {
         # $function:AzAPICall = $using:funcAzAPICall
         # $function:createBearerToken = $using:funcCreateBearerToken
         # $function:GetJWTDetails = $using:funcGetJWTDetails
-        Import-Module .\pwsh\module\AzAPICall\AzAPICall.psd1 -Force -ErrorAction Stop
+        # Import-Module .\pwsh\module\AzAPICall\AzAPICall.psd1 -Force -ErrorAction Stop
+        Import-Module '.\pwsh\bin\AzAPICall' -Force -ErrorAction Stop
         #specific for this operation
         $htAzureResources = $using:htAzureResources
         $arrayAzureResources = $using:arrayAzureResources
@@ -323,7 +325,7 @@ else {
         $azAPICallPayload = @{
             uri         = $uri
             method      = 'GET'
-            currentTask = " '$($htAzureEnvironmentRelatedTargetEndpoints.($apiEndPoint.split('/')[2])) API: Get - Resources for Subscription (name: $($subscription.displayName); id: $($subscription.subscriptionId))'"
+            currentTask            = " '$($Configuration['htAzureEnvironmentRelatedTargetEndpoints'].($apiEndPoint.split('/')[2])) API: Get - Resources for Subscription (name: $($subscription.displayName); id: $($subscription.subscriptionId))'"
             AzAPICallConfiguration = $Configuration
         }
         Write-Host $azAPICallPayload.currentTask
