@@ -83,7 +83,7 @@
         }
         $targetEndpoint = ($AzApiCallConfiguration['htAzureEnvironmentRelatedTargetEndpoints']).($uriSplitted[2])
         if (-not ($AzAPICallConfiguration['htBearerAccessToken']).$targetEndpoint) {
-            createBearerToken -targetEndPoint $targetEndpoint -checkContext $AzAPICallConfiguration.checkContext -AzAPICallConfiguration $AzAPICallConfiguration
+            createBearerToken -targetEndPoint $targetEndpoint -AzAPICallConfiguration $AzAPICallConfiguration
         }
 
         $unexpectedError = $false
@@ -330,7 +330,7 @@
 
                     if ($catchResult.error.code -like '*ExpiredAuthenticationToken*' -or $catchResult.error.code -like '*Authentication_ExpiredToken*' -or $catchResult.error.code -like '*InvalidAuthenticationToken*') {
                         Write-Host " $currentTask - try #$tryCounter; returned: (StatusCode: '$($azAPIRequest.StatusCode)') '$($catchResult.error.code)' | '$($catchResult.error.message)' - requesting new bearer token ($targetEndpoint)"
-                        createBearerToken -targetEndPoint $targetEndpoint -checkContext $AzAPICallConfiguration.checkContext
+                        createBearerToken -targetEndPoint $targetEndpoint -AzAPICallConfiguration $AzAPICallConfiguration
                     }
 
                     if (

@@ -20,11 +20,6 @@
         [string]
         $targetEndPoint,
 
-        [Parameter(Mandatory = $true)]
-        [Microsoft.Azure.Commands.Profile.Models.Core.PSAzureContext]
-        $checkContext,
-
-
         $AzApiCallConfiguration
     )
 
@@ -32,7 +27,7 @@
 
     if (($AzApiCallConfiguration['htAzureEnvironmentRelatedUrls']).$targetEndPoint) {
 
-        # $checkContext = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile.DefaultContext
+        $checkContext = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile.DefaultContext
         $catchResult = 'letscheck'
         try {
             $newBearerAccessTokenRequest = [Microsoft.Azure.Commands.Common.Authentication.AzureSession]::Instance.AuthenticationFactory.Authenticate($checkContext.Account, $checkContext.Environment, $checkContext.Tenant.id.ToString(), $null, [Microsoft.Azure.Commands.Common.Authentication.ShowDialog]::Never, $null, "$(($AzApiCallConfiguration['htAzureEnvironmentRelatedUrls']).$targetEndPoint)")
